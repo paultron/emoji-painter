@@ -31,12 +31,12 @@ function setup () {
   frameRate(fRate)
   stroke(255)
   // Create a 16x16 grid
-  numTiles = Math.floor(img.width / imgTileSize) ** 2
+  numTiles = names.length
   grid = []
   for (let i = 0; i < gridWidth; i++) {
     grid[i] = []
     for (let j = 0; j < gridHeight; j++) {
-      grid[i][j] = numTiles + 1
+      grid[i][j] = -1
     }
   }
   imgSec = img.get(512, 0, imgTileSize, imgTileSize)
@@ -57,10 +57,15 @@ function draw () {
   rect(0, 0, 1024, 512)
   // Draw the emoji sheet on right
   image(img, 512, 0)
-
+  stroke(127)
+  for (let i = 0; i < gridWidth; i++) {
+    for (let j = 0; j < gridHeight; j++) {
+      rect(i * tileSize, j * tileSize, tileSize, tileSize);
+    }}
   // Draw the grid
   for (let i = 0; i < gridWidth; i++) {
     for (let j = 0; j < gridHeight; j++) {
+      //rect(i * tileSize, j * tileSize, tileSize, tileSize);
       if (grid[i][j] < numTiles) {
         // Draw a filled square at the current position
         //fill(0);
@@ -78,7 +83,7 @@ function draw () {
           tileSize,
           tileSize
         )
-      } else if (grid[i][j] === numTiles + 1) {
+      } else if (grid[i][j] === -1) {
         // Draw an unfilled square at the current position
         //noFill();
         //rect(i * tileSize, j * tileSize, tileSize, tileSize);
@@ -96,7 +101,7 @@ function draw () {
       }
       if (mouseButton === RIGHT) {
         grid[Math.floor(mouseX / tileSize)][Math.floor(mouseY / tileSize)] =
-          numTiles + 1
+          -1
       }
     }
     // Selection functions
@@ -104,6 +109,7 @@ function draw () {
       sel =
         Math.floor((mouseX - 512) / imgTileSize) +
         Math.floor(mouseY / imgTileSize) * gridWidth
+        if (sel > (numTiles-1)) sel = -1
       selX = (sel % gridWidth) * imgTileSize // x position
       selY = Math.floor(sel / gridHeight) * imgTileSize // y position
       imgSec = img.get(selX, selY, imgTileSize, imgTileSize)
@@ -128,7 +134,7 @@ function makeText () {
   newGrid = trimToBoundingBox(grid)
   for (let i = 0; i < newGrid[0].length; i++) {
     for (let j = 0; j < newGrid.length; j++) {
-      if (newGrid[j][i] === numTiles + 1) {
+      if (newGrid[j][i] === -1) {
         outStr = outStr.concat(':blank:')
       } else if (newGrid[j][i] < numTiles + 1) {
         //add each name to string one row at at time
@@ -139,6 +145,8 @@ function makeText () {
       outStr = outStr.concat('\n')
     }
   }
+
+  
   navigator.clipboard.writeText(outStr)
 }
 function keyPressed () {
@@ -161,7 +169,7 @@ function trimToBoundingBox (array) {
   // Find the minimum and maximum x, y coordinates of non-empty cells
   for (let row = 0; row < numRows; row++) {
     for (let col = 0; col < numCols; col++) {
-      if (array[row][col] !== numTiles + 1) {
+      if (array[row][col] !== -1) {
         minX = Math.min(minX, col)
         minY = Math.min(minY, row)
         maxX = Math.max(maxX, col)
@@ -179,7 +187,22 @@ function trimToBoundingBox (array) {
 
   return trimmedArray
 }
+function trimBlanks (array) {
+  let numCols = array.length
+  let maxX = -1
 
+  // Find the minimum and maximum x, y coordinates of non-empty cells
+      for (let col = 0; col < numCols; col++) {
+      if (array[col] !== -1) {
+        maxX = Math.max(maxX, col)
+      }
+    }
+
+  // Create the trimmed array based on the bounding box
+  let trimmedArray = array.slice(0, maxX + 1)
+
+  return trimmedArray
+}
 function screenshot () {
   get(0, 0, 512, 512).save()
 }
