@@ -42,10 +42,10 @@ function setup () {
   imgSec = img.get(512, 0, imgTileSize, imgTileSize)
 
   button = createButton('Copy Discord Emoji');
-  button.position(0, 512);
+  button.position(0, 552);
   button.mousePressed(makeText);
   button = createButton('Save Image');
-  button.position(0, 532);
+  button.position(150, 552);
   button.mousePressed(screenshot);
 }
 
