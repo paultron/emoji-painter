@@ -19,7 +19,7 @@ function preload () {
 }
 
 function setup () {
-  const canvas = createCanvas(1024, 512)
+  const canvas = createCanvas(1024, 768)
   canvas.elt.addEventListener('contextmenu', e => e.preventDefault())
 
   
@@ -40,6 +40,13 @@ function setup () {
     }
   }
   imgSec = img.get(512, 0, imgTileSize, imgTileSize)
+
+  button = createButton('Copy Discord Emoji');
+  button.position(0, 512);
+  button.mousePressed(makeText);
+  button = createButton('Save Image');
+  button.position(0, 532);
+  button.mousePressed(screenshot);
 }
 
 function draw () {
