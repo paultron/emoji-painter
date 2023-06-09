@@ -40,7 +40,7 @@ function setup () {
   clearCanvas()
   // Set default selection tile
   imgSec = img.get(512, 32, imgTileSize, imgTileSize)
-  
+
   // Create buttons for save/copy/clear
   button = createButton('Copy Discord Emoji')
   button.position(0, 552)
@@ -57,6 +57,9 @@ function setup () {
   button = createButton('Toggle Grid')
   button.position(400, 552)
   button.mousePressed(toggleGrid)
+  
+
+  updateSelection()
 }
 
 function draw () {
@@ -99,8 +102,19 @@ function draw () {
 
   // Listen for mouse clicks
   if (mouseIsPressed) {
-    // Draw only on left
-    if (mouseX < 512 && mouseY < 512) {
+    // Selections first
+    if (mouseX < 512 && mouseY < 512 && mouseButton === CENTER)
+    {
+      sel = grid[Math.floor(mouseY / tileSize)][Math.floor(mouseX / tileSize)]
+    }
+    else if (mouseX > 512 && mouseY < 512) {
+      sel =
+        Math.floor((mouseX - 512) / imgTileSize) +
+        Math.floor(mouseY / imgTileSize) * gridWidth
+      updateSelection()
+    }
+    // Otherwise draw
+    else if (mouseX < 512 && mouseY < 512) {
       if (mouseButton === LEFT) {
         // Set the corresponding grid square to current selection, or :blank:
         grid[Math.floor(mouseY / tileSize)][Math.floor(mouseX / tileSize)] = sel
@@ -109,16 +123,8 @@ function draw () {
         grid[Math.floor(mouseY / tileSize)][Math.floor(mouseX / tileSize)] = -1
       }
     }
-    // Selection functions
-    if (mouseX > 512 && mouseY < 512) {
-      sel =
-        Math.floor((mouseX - 512) / imgTileSize) +
-        Math.floor(mouseY / imgTileSize) * gridWidth
-      if (sel > numTiles - 1) sel = -1
-      selX = (sel % gridWidth) * imgTileSize // x position
-      selY = Math.floor(sel / gridHeight) * imgTileSize // y position
-      imgSec = img.get(selX, selY, imgTileSize, imgTileSize)
-    }
+
+    
     line(pmouseX, pmouseY, mouseX, mouseY)
   }
   // Draw selection rectangle for 0.5s or 15 frames
@@ -130,9 +136,19 @@ function draw () {
     fCount = fRate
   }
   fCount--
+  fill(192)
+  noStroke()
+  text('Left click = draw | Right click = erase | Middle click = sample', 10, 530);
+  noFill()
 }
 
-function setSelection (x, y) {}
+function updateSelection () {
+  if (sel > numTiles - 1) sel = -1
+  selX = (sel % gridWidth) * imgTileSize // x position
+  selY = Math.floor(sel / gridHeight) * imgTileSize // y position
+  fcount = fRate / 2
+  //imgSec = img.get(selX, selY, imgTileSize, imgTileSize)
+}
 
 function makeText () {
   let outStr = ''
