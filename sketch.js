@@ -100,12 +100,18 @@ function draw () {
       image(emojis[grid[i][j]], j * tileSize, i * tileSize)
     }
   }
-  
+
   // Listen for mouse clicks
   if (mouseIsPressed) {
     // Otherwise left
-    if (mouseY > 0 && mouseX < 512 && mouseY < 512&& pmouseX<512 && pmouseY < 512) {
-      if (mouseButton === LEFT ) {
+    if (
+      mouseY > 0 &&
+      mouseX < 512 &&
+      mouseY < 512 &&
+      pmouseX < 512 &&
+      pmouseY < 512
+    ) {
+      if (mouseButton === LEFT) {
         // Set the corresponding grid square to current selection, or :blank:
         //grid[Math.floor(mouseY / tileSize)][Math.floor(mouseX / tileSize)] = sel
         plotLine(
@@ -138,7 +144,7 @@ function draw () {
     }
     line(pmouseX, pmouseY, mouseX, mouseY)
   }
-  
+
   // Draw selection rectangle for 0.5s or fRate/2 frames
   if (fCount > fRate / 2) {
     stroke(192)
@@ -156,7 +162,7 @@ function draw () {
     530
   )
   noFill()
-  
+
   let fps = frameRate()
   fill(255)
   stroke(0)
@@ -164,7 +170,6 @@ function draw () {
   frameTimes.push(fps)
   frameTimes.shift()
   drawFpsCounter(96, height - 25, 120, 25)
-  
 }
 
 function updateSelection () {
@@ -192,7 +197,9 @@ function makeText () {
     }
   }
   // Strips EOL :blank: emoji and copies to clipboard
-  navigator.clipboard.writeText(outStr.replace(/(?::blank:)+$/gm, '').replace(/^$/gm,':blank:'))
+  navigator.clipboard.writeText(
+    outStr.replace(/(?::blank:)+$/gm, '').replace(/^$/gm, ':blank:')
+  )
   //navigator.clipboard.writeText(outStr)
 }
 function keyPressed () {
@@ -234,7 +241,11 @@ function trimToBoundingBox (array) {
   return trimmedArray
 }
 function screenshot () {
+  let g = gridOn
+  gridOn = false
+  redraw()
   get(0, 0, 512, 512).save()
+  gridOn = g
 }
 function toggleGrid () {
   gridOn = !gridOn
