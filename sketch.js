@@ -57,7 +57,6 @@ function setup () {
   button = createButton('Toggle Grid')
   button.position(400, 552)
   button.mousePressed(toggleGrid)
-  
 
   updateSelection()
 }
@@ -74,10 +73,12 @@ function draw () {
   // Draw canvas grid fully to make sure it's under all emoji
   if (gridOn) {
     for (let j = 0; j < gridHeight; j++) {
-      for (let i = 0; i < gridWidth; i++) {
-        rect(i * tileSize, j * tileSize, tileSize, tileSize)
-      }
+      line((j*tileSize),0,(j*tileSize),512)
     }
+      for (let i = 0; i < gridWidth; i++) {
+        line(0,(i*tileSize),512,(i*tileSize))
+        //rect(i * tileSize, j * tileSize, tileSize, tileSize)
+      }
   }
   // Draw the emoji on the canvas
   for (let i = 0; i < gridHeight; i++) {
@@ -103,11 +104,9 @@ function draw () {
   // Listen for mouse clicks
   if (mouseIsPressed) {
     // Selections first
-    if (mouseX < 512 && mouseY < 512 && mouseButton === CENTER)
-    {
+    if (mouseX < 512 && mouseY < 512 && mouseButton === CENTER) {
       sel = grid[Math.floor(mouseY / tileSize)][Math.floor(mouseX / tileSize)]
-    }
-    else if (mouseX > 512 && mouseY < 512) {
+    } else if (mouseX > 512 && mouseY < 512) {
       sel =
         Math.floor((mouseX - 512) / imgTileSize) +
         Math.floor(mouseY / imgTileSize) * gridWidth
@@ -124,7 +123,6 @@ function draw () {
       }
     }
 
-    
     line(pmouseX, pmouseY, mouseX, mouseY)
   }
   // Draw selection rectangle for 0.5s or 15 frames
@@ -138,7 +136,11 @@ function draw () {
   fCount--
   fill(192)
   noStroke()
-  text('Left click = draw | Right click = erase | Middle click = sample', 10, 530);
+  text(
+    'Left click = draw | Right click = erase | Middle click = sample',
+    10,
+    530
+  )
   noFill()
 }
 
