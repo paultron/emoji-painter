@@ -12,6 +12,8 @@ let gridWidth = 16 // Number of tiles in the x-axis
 let gridHeight = 16 // Number of tiles in the y-axis
 let numTiles // Number of valid emoji in the image/list
 
+let emojis = []
+
 let fRate = 60
 let fCount = fRate // Selection blink counter
 let frameTimes = []
@@ -24,6 +26,18 @@ function preload () {
 }
 p5.disableFriendlyErrors = true
 function setup () {
+  pixelDensity(1)
+  numTiles = names.length
+  emojis = []
+  for (let i = 0; i < numTiles; i++) {
+    emojis[i] = img.get(
+      (i % gridWidth) * imgTileSize,
+      Math.floor(i / gridHeight) * imgTileSize,
+      tileSize,
+      tileSize
+    )
+    //console.log(emojis[i].width)
+  }
   let canvas = createCanvas(1024, 600)
   canvas.elt.addEventListener('contextmenu', e => e.preventDefault()) // Stop right click menu
   canvas.parent('myContainer') // Insert into 'myContainer' div
@@ -37,7 +51,6 @@ function setup () {
   stroke(255)
   noFill()
   // Create a 16x16 grid
-  numTiles = names.length
   //Set up and populate grid with blankNum
   clearCanvas()
   for (let i = 0; i < frameTimesAmt; i++) {
@@ -67,11 +80,7 @@ function setup () {
 }
 
 function draw () {
-  // Clear the screen
   background(49, 51, 56)
-  // darkmode
-  //fill(49, 51, 56)
-  //rect(0, 0, 1024, 512)
   // Draw the emoji sheet on right
   image(img, 512, 0)
   stroke(127)
@@ -84,32 +93,19 @@ function draw () {
       line(0, i * tileSize, 512, i * tileSize)
     }
   }
+
   // Draw the emoji on the canvas
   for (let i = 0; i < gridHeight; i++) {
     for (let j = 0; j < gridWidth; j++) {
-      //rect(i * tileSize, j * tileSize, tileSize, tileSize);
-      //if (grid[i][j] < numTiles) {
-      image(
-        img.get(
-          (grid[i][j] % gridWidth) * imgTileSize,
-          Math.floor(grid[i][j] / gridHeight) * imgTileSize,
-          imgTileSize,
-          imgTileSize
-        ),
-        j * tileSize,
-        i * tileSize,
-        tileSize,
-        tileSize
-      )
-      //}
+      image(emojis[grid[i][j]], j * tileSize, i * tileSize)
     }
   }
-
+  
   // Listen for mouse clicks
   if (mouseIsPressed) {
     // Otherwise left
-    if (mouseX < 512 && mouseY < 512) {
-      if (mouseButton === LEFT) {
+    if (mouseY > 0 && mouseX < 512 && mouseY < 512&& pmouseX<512 && pmouseY < 512) {
+      if (mouseButton === LEFT ) {
         // Set the corresponding grid square to current selection, or :blank:
         //grid[Math.floor(mouseY / tileSize)][Math.floor(mouseX / tileSize)] = sel
         plotLine(
@@ -140,11 +136,10 @@ function draw () {
         Math.floor(mouseY / imgTileSize) * gridWidth
       updateSelection()
     }
-    //plotLine(Math.floor(pmouseX / tileSize), Math.floor(pmouseY / tileSize), Math.floor(mouseX / tileSize), Math.floor(mouseY / tileSize), sel)
     line(pmouseX, pmouseY, mouseX, mouseY)
   }
-
-  // Draw selection rectangle for 0.5s or 15 frames
+  
+  // Draw selection rectangle for 0.5s or fRate/2 frames
   if (fCount > fRate / 2) {
     stroke(192)
     noFill()
@@ -161,7 +156,7 @@ function draw () {
     530
   )
   noFill()
-  /*
+  
   let fps = frameRate()
   fill(255)
   stroke(0)
@@ -169,7 +164,7 @@ function draw () {
   frameTimes.push(fps)
   frameTimes.shift()
   drawFpsCounter(96, height - 25, 120, 25)
-  */
+  
 }
 
 function updateSelection () {
@@ -177,7 +172,6 @@ function updateSelection () {
   selX = (sel % gridWidth) * imgTileSize // x position
   selY = Math.floor(sel / gridHeight) * imgTileSize // y position
   fcount = fRate // Reset selection square to ON
-  //imgSec = img.get(selX, selY, imgTileSize, imgTileSize)
 }
 
 function makeText () {
