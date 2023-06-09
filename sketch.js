@@ -192,8 +192,8 @@ function makeText () {
     }
   }
   // Strips EOL :blank: emoji and copies to clipboard
-  //navigator.clipboard.writeText(outStr.replace(/(?::blank:)+$/gm, ''))
-  navigator.clipboard.writeText(outStr)
+  navigator.clipboard.writeText(outStr.replace(/(?::blank:)+$/gm, '').replace(/^$/gm,':blank:'))
+  //navigator.clipboard.writeText(outStr)
 }
 function keyPressed () {
   if (keyCode === LEFT_ARROW) {
@@ -215,7 +215,7 @@ function trimToBoundingBox (array) {
   // Find the minimum and maximum x, y coordinates of non-empty cells
   for (let row = 0; row < numRows; row++) {
     for (let col = 0; col < numCols; col++) {
-      if (array[row][col] !== -1) {
+      if (array[row][col] !== blankNum) {
         minX = Math.min(minX, col)
         minY = Math.min(minY, row)
         maxX = Math.max(maxX, col)
@@ -230,22 +230,6 @@ function trimToBoundingBox (array) {
     let trimmedRow = array[row].slice(minX, maxX + 1)
     trimmedArray.push(trimmedRow)
   }
-
-  return trimmedArray
-}
-function trimBlanks (array) {
-  let numCols = array.length
-  let maxX = -1
-
-  // Find the minimum and maximum x, y coordinates of non-empty cells
-  for (let col = 0; col < numCols; col++) {
-    if (array[col] !== -1) {
-      maxX = Math.max(maxX, col)
-    }
-  }
-
-  // Create the trimmed array based on the bounding box
-  let trimmedArray = array.slice(0, maxX + 1)
 
   return trimmedArray
 }
