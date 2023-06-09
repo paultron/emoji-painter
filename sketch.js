@@ -12,7 +12,7 @@ let gridWidth = 16 // Number of tiles in the x-axis
 let gridHeight = 16 // Number of tiles in the y-axis
 let numTiles // Number of valid emoji in the image/list
 
-let fRate = 30
+let fRate = 60
 let fCount = fRate // Selection blink counter
 let frameTimes = []
 let frameTimesAmt = 120
@@ -107,18 +107,11 @@ function draw () {
 
   // Listen for mouse clicks
   if (mouseIsPressed) {
-    // Right half first
-    if (mouseX > 512 && mouseX < 1024 && mouseY < 512) {
-      sel =
-        Math.floor((mouseX - 512) / imgTileSize) +
-        Math.floor(mouseY / imgTileSize) * gridWidth
-      updateSelection()
-    }
     // Otherwise left
-    else if (mouseX < 512 && mouseY < 512) {
+    if (mouseX < 512 && mouseY < 512) {
       if (mouseButton === LEFT) {
         // Set the corresponding grid square to current selection, or :blank:
-        grid[Math.floor(mouseY / tileSize)][Math.floor(mouseX / tileSize)] = sel
+        //grid[Math.floor(mouseY / tileSize)][Math.floor(mouseX / tileSize)] = sel
         plotLine(
           Math.floor(pmouseX / tileSize),
           Math.floor(pmouseY / tileSize),
@@ -127,8 +120,7 @@ function draw () {
           sel
         )
       } else if (mouseButton === RIGHT) {
-        grid[Math.floor(mouseY / tileSize)][Math.floor(mouseX / tileSize)] =
-          blankNum
+        //grid[Math.floor(mouseY / tileSize)][Math.floor(mouseX / tileSize)] = blankNum
         plotLine(
           Math.floor(pmouseX / tileSize),
           Math.floor(pmouseY / tileSize),
@@ -136,15 +128,22 @@ function draw () {
           Math.floor(mouseY / tileSize),
           blankNum
         )
-      }
-      if (mouseButton === CENTER) {
+      } else if (mouseButton === CENTER) {
         sel = grid[Math.floor(mouseY / tileSize)][Math.floor(mouseX / tileSize)]
         updateSelection()
       }
     }
+    // Right half 2nd
+    else if (mouseX > 512 && mouseX < 1024 && mouseY < 512) {
+      sel =
+        Math.floor((mouseX - 512) / imgTileSize) +
+        Math.floor(mouseY / imgTileSize) * gridWidth
+      updateSelection()
+    }
     //plotLine(Math.floor(pmouseX / tileSize), Math.floor(pmouseY / tileSize), Math.floor(mouseX / tileSize), Math.floor(mouseY / tileSize), sel)
-    //line(pmouseX, pmouseY, mouseX, mouseY)
+    line(pmouseX, pmouseY, mouseX, mouseY)
   }
+
   // Draw selection rectangle for 0.5s or 15 frames
   if (fCount > fRate / 2) {
     stroke(192)
@@ -162,7 +161,7 @@ function draw () {
     530
   )
   noFill()
-
+  /*
   let fps = frameRate()
   fill(255)
   stroke(0)
@@ -170,6 +169,7 @@ function draw () {
   frameTimes.push(fps)
   frameTimes.shift()
   drawFpsCounter(96, height - 25, 120, 25)
+  */
 }
 
 function updateSelection () {
@@ -279,8 +279,8 @@ function plotLine (x0, y0, x1, y1, ID) {
 
   while (true) {
     // Plot the current point (x0, y0)
-    console.log('(' + x0 + ', ' + y0 + ')')
-    grid[Math.floor(mouseY / tileSize)][Math.floor(mouseX / tileSize)] = ID
+    //console.log('(' + x0 + ', ' + y0 + ')')
+    grid[y0][x0] = ID
     if (x0 === x1 && y0 === y1) {
       break
     }
