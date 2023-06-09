@@ -1,6 +1,7 @@
 let img // Emoji image
 let imgSec // Subsection for drawing
 let sel = 16 // Selected emoji, default skeddle
+let blankNum = 17 // ID of blank emoji
 let selX, selY // XY coords of selected emoji
 let names // List of emoji names, must match order of image
 
@@ -11,16 +12,17 @@ let gridWidth = 16 // Number of tiles in the x-axis
 let gridHeight = 16 // Number of tiles in the y-axis
 let numTiles // Number of valid emoji in the image/list
 
-let fRate = 60
-let fCount = fRate / 2 // Selection blink counter
-
+let fRate = 30
+let fCount = fRate // Selection blink counter
+let frameTimes = []
+let frameTimesAmt = 120
 let gridOn = true
 
 function preload () {
   img = loadImage('assets/emoji.png')
   names = loadStrings('assets/names.txt')
 }
-
+p5.disableFriendlyErrors = true
 function setup () {
   let canvas = createCanvas(1024, 600)
   canvas.elt.addEventListener('contextmenu', e => e.preventDefault()) // Stop right click menu
@@ -36,8 +38,11 @@ function setup () {
   noFill()
   // Create a 16x16 grid
   numTiles = names.length
-  //Set up and populate grid with -1
+  //Set up and populate grid with blankNum
   clearCanvas()
+  for (let i = 0; i < frameTimesAmt; i++) {
+    frameTimes[i] = 0
+  }
   // Set default selection tile
   imgSec = img.get(512, 32, imgTileSize, imgTileSize)
 
@@ -46,7 +51,7 @@ function setup () {
   button.position(0, 552)
   button.mousePressed(makeText)
 
-  button = createButton('Save Image')
+  button = createButton('Save PNG Image')
   button.position(150, 552)
   button.mousePressed(screenshot)
 
@@ -73,57 +78,72 @@ function draw () {
   // Draw canvas grid fully to make sure it's under all emoji
   if (gridOn) {
     for (let j = 0; j < gridHeight; j++) {
-      line((j*tileSize),0,(j*tileSize),512)
+      line(j * tileSize, 0, j * tileSize, 512)
     }
-      for (let i = 0; i < gridWidth; i++) {
-        line(0,(i*tileSize),512,(i*tileSize))
-        //rect(i * tileSize, j * tileSize, tileSize, tileSize)
-      }
+    for (let i = 0; i < gridWidth; i++) {
+      line(0, i * tileSize, 512, i * tileSize)
+    }
   }
   // Draw the emoji on the canvas
   for (let i = 0; i < gridHeight; i++) {
     for (let j = 0; j < gridWidth; j++) {
       //rect(i * tileSize, j * tileSize, tileSize, tileSize);
-      if (grid[i][j] < numTiles) {
-        image(
-          img.get(
-            (grid[i][j] % gridWidth) * imgTileSize,
-            Math.floor(grid[i][j] / gridHeight) * imgTileSize,
-            imgTileSize,
-            imgTileSize
-          ),
-          j * tileSize,
-          i * tileSize,
-          tileSize,
-          tileSize
-        )
-      }
+      //if (grid[i][j] < numTiles) {
+      image(
+        img.get(
+          (grid[i][j] % gridWidth) * imgTileSize,
+          Math.floor(grid[i][j] / gridHeight) * imgTileSize,
+          imgTileSize,
+          imgTileSize
+        ),
+        j * tileSize,
+        i * tileSize,
+        tileSize,
+        tileSize
+      )
+      //}
     }
   }
 
   // Listen for mouse clicks
   if (mouseIsPressed) {
-    // Selections first
-    if (mouseX < 512 && mouseY < 512 && mouseButton === CENTER) {
-      sel = grid[Math.floor(mouseY / tileSize)][Math.floor(mouseX / tileSize)]
-    } else if (mouseX > 512 && mouseY < 512) {
+    // Right half first
+    if (mouseX > 512 && mouseX < 1024 && mouseY < 512) {
       sel =
         Math.floor((mouseX - 512) / imgTileSize) +
         Math.floor(mouseY / imgTileSize) * gridWidth
       updateSelection()
     }
-    // Otherwise draw
+    // Otherwise left
     else if (mouseX < 512 && mouseY < 512) {
       if (mouseButton === LEFT) {
         // Set the corresponding grid square to current selection, or :blank:
         grid[Math.floor(mouseY / tileSize)][Math.floor(mouseX / tileSize)] = sel
+        plotLine(
+          Math.floor(pmouseX / tileSize),
+          Math.floor(pmouseY / tileSize),
+          Math.floor(mouseX / tileSize),
+          Math.floor(mouseY / tileSize),
+          sel
+        )
+      } else if (mouseButton === RIGHT) {
+        grid[Math.floor(mouseY / tileSize)][Math.floor(mouseX / tileSize)] =
+          blankNum
+        plotLine(
+          Math.floor(pmouseX / tileSize),
+          Math.floor(pmouseY / tileSize),
+          Math.floor(mouseX / tileSize),
+          Math.floor(mouseY / tileSize),
+          blankNum
+        )
       }
-      if (mouseButton === RIGHT) {
-        grid[Math.floor(mouseY / tileSize)][Math.floor(mouseX / tileSize)] = -1
+      if (mouseButton === CENTER) {
+        sel = grid[Math.floor(mouseY / tileSize)][Math.floor(mouseX / tileSize)]
+        updateSelection()
       }
     }
-
-    line(pmouseX, pmouseY, mouseX, mouseY)
+    //plotLine(Math.floor(pmouseX / tileSize), Math.floor(pmouseY / tileSize), Math.floor(mouseX / tileSize), Math.floor(mouseY / tileSize), sel)
+    //line(pmouseX, pmouseY, mouseX, mouseY)
   }
   // Draw selection rectangle for 0.5s or 15 frames
   if (fCount > fRate / 2) {
@@ -142,13 +162,21 @@ function draw () {
     530
   )
   noFill()
+
+  let fps = frameRate()
+  fill(255)
+  stroke(0)
+  text('FPS: ' + fps.toFixed(2), 10, height - 10)
+  frameTimes.push(fps)
+  frameTimes.shift()
+  drawFpsCounter(96, height - 25, 120, 25)
 }
 
 function updateSelection () {
-  if (sel > numTiles - 1) sel = -1
+  if (sel > numTiles - 1) sel = blankNum
   selX = (sel % gridWidth) * imgTileSize // x position
   selY = Math.floor(sel / gridHeight) * imgTileSize // y position
-  fcount = fRate / 2
+  fcount = fRate // Reset selection square to ON
   //imgSec = img.get(selX, selY, imgTileSize, imgTileSize)
 }
 
@@ -158,7 +186,7 @@ function makeText () {
 
   for (let i = 0; i < newGrid.length; i++) {
     for (let j = 0; j < newGrid[i].length; j++) {
-      if (newGrid[i][j] === -1) {
+      if (newGrid[i][j] === blankNum) {
         outStr = outStr.concat(':blank:')
       } else if (newGrid[i][j] < numTiles + 1) {
         //add each name to string one row at at time
@@ -238,7 +266,43 @@ function clearCanvas () {
   for (let i = 0; i < gridHeight; i++) {
     grid[i] = []
     for (let j = 0; j < gridWidth; j++) {
-      grid[i][j] = -1
+      grid[i][j] = blankNum
     }
+  }
+}
+function plotLine (x0, y0, x1, y1, ID) {
+  const dx = Math.abs(x1 - x0)
+  const dy = Math.abs(y1 - y0)
+  const sx = x0 < x1 ? 1 : -1
+  const sy = y0 < y1 ? 1 : -1
+  let err = dx - dy
+
+  while (true) {
+    // Plot the current point (x0, y0)
+    console.log('(' + x0 + ', ' + y0 + ')')
+    grid[Math.floor(mouseY / tileSize)][Math.floor(mouseX / tileSize)] = ID
+    if (x0 === x1 && y0 === y1) {
+      break
+    }
+
+    const e2 = 2 * err
+
+    if (e2 > -dy) {
+      err -= dy
+      x0 += sx
+    }
+
+    if (e2 < dx) {
+      err += dx
+      y0 += sy
+    }
+  }
+}
+function drawFpsCounter (x, y, w, h) {
+  stroke(255)
+  for (i = 0; i < frameTimesAmt; i++) {
+    let x2 = map(i, 0, frameTimesAmt, x, x + w)
+    let y2 = map(frameTimes[i], 0, fRate, y + h, y)
+    point(x2, y2)
   }
 }
